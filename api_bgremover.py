@@ -1,28 +1,14 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, send_file
 from rembg import remove
 from PIL import Image
 
 app = Flask(__name__)
 
-image = [
-  {
-    "path": "error.jpg",
-    "name": "error.jpg",
-  }
-]
+@app.route('/remove_bg', methods = ['PUT'])
+def send_image():
+  file = request.files['image']
+  img = Image.open(file.stream)
+  removing_bg = remove(img).save("foto.png")
+  return send_file("./foto.png", as_attachment=True)
 
-#return data
-@app.route('/imagem', methods = ['GET'])
-def return_image():
-  return jsonify(image)
-
-#remove background
-@app.route('/imagem/envio', methods = ['PUT'])
-def remover_background():
-  image_content = request.get_json()
-  image_data = Image.open(image_content)
-  removing_bg = remove(image_data).save("foto.png")  
-  image[0].update(removing_bg)
-  return jsonify(image)
-
-app.run(port=5000, host='localhost', debug=True)
+app.run(port=5000, host='0.0.0.0', debug=True)
